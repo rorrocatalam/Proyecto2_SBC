@@ -55,7 +55,7 @@ class BaseDeReglas:
 
     def trip_en_con(self, trip):
         """
-        Metodo para encontrar reglas que tienen como conclusion una determinada tripleta
+        Metodo para encontrar las reglas utiles que tienen como conclusion una determinada tripleta
         """
         # Lista de reglas que cumplen requisito
         lista_reglas = []
@@ -64,9 +64,17 @@ class BaseDeReglas:
         for regla in self.reglas:
             # Conclusiones de la regla
             regla_con = regla.con
-            # Se guarda la regla si cumple requisito
+            # Si la tripleta esta en las conclusiones se procede
             if trip in regla_con:
-                lista_reglas.append(regla)
+                # Grados de implicacion de conclusiones de la regla
+                regla_vc = regla.vc
+                # Posicion de la tripleta en conclusiones
+                indice_trip = regla_con.index(trip)
+                # Grado de implicacion de la tripleta
+                vc_trip =  regla_vc[indice_trip]
+                # Si su grado de implicacion supera el umbral, la regla se considera util y se guarda
+                if abs(vc_trip) >= epsilon: 
+                    lista_reglas.append(regla)
         
         # Retorno lista de reglas 
         return lista_reglas
