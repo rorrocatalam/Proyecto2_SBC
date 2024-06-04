@@ -1,4 +1,13 @@
 #=============================================================================
+# Parametros de control
+
+alpha   = 0.7   # Para detener el AEI cuando se demuestre una hipotesis
+beta    = 0.2   # Para determinar si un hecho tiene un grado de certidumbre suficiente
+gamma   = 0.85  # Para determinar si se debe seguir buscando un mejor grado de certidumbre para un hecho
+epsilon = 0.5   # Para determinar cuando una regla tiene un grado de certidumbre suficiente para inferir una hipotesis
+delta   = 0.2   # Para determinar si el grado de certidumbre es suficiente para gatillar una regla (es variable)
+
+#=============================================================================
 # Estructuras basicas
 
 class Hecho:
