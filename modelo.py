@@ -10,35 +10,35 @@ delta   = 0.2   # Para determinar si el grado de certidumbre es suficiente para 
 #=============================================================================
 # Estructuras basicas
 
-class Hecho:
+class Fact:
     def __init__(self, prem, vc):
         self.prem   = prem
         self.vc     = vc
 
-class Regla:
+class Rule:
     def __init__(self, prem, con, vc):
         self.prem   = prem
         self.con    = con
         self.vc     = vc
     
-    def es_evaluable(self, bdh):
+    def is_evaluable(self, fb):
         """
         Metodo para saber si la regla es evaluable en la base de hechos
         """
         # Tripletas de la base de hechos
-        bdh_lista_trip = bdh.lista_trip
+        fb_list_trip = fb.list_trip
         # Retorno booleano si la regla se puede evaluar
-        return set(self.prem).issubset(bdh_lista_trip)
+        return set(self.prem).issubset(fb_list_trip)
 
 #=============================================================================
 # Conjuntos a utilizar
 
-class BaseDeHechos:
+class FactBase:
     def __init__(self):
-        self.lista_trip  = []
-        self.lista_vc    = []
+        self.list_trip  = []
+        self.list_vc    = []
     
-    def agregar_hecho(self, hecho):
+    def add_fact(self, hecho):
         """
         Metodo para agregar hechos
         """
@@ -46,35 +46,35 @@ class BaseDeHechos:
         prem = hecho.prem
         vc = hecho.vc
         # Guardar valores
-        self.lista_trip.append(prem[0])
-        self.lista_vc.append(vc)
+        self.list_trip.append(prem[0])
+        self.list_vc.append(vc)
 
-class BaseDeReglas:
-    def __init__(self, reglas):
-        self.reglas = reglas
+class RuleBase:
+    def __init__(self, rules):
+        self.rules = rules
 
-    def trip_en_con(self, trip):
+    def trip_in_con(self, trip):
         """
         Metodo para encontrar las reglas utiles que tienen como conclusion una determinada tripleta
         """
         # Lista de reglas que cumplen requisito
-        lista_reglas = []
+        rule_list = []
 
         # Se revisan todas las reglas presentes
-        for regla in self.reglas:
+        for rule in self.rules:
             # Conclusiones de la regla
-            regla_con = regla.con
+            rule_con = rule.con
             # Si la tripleta esta en las conclusiones se procede
-            if trip in regla_con:
+            if trip in rule_con:
                 # Grados de implicacion de conclusiones de la regla
-                regla_vc = regla.vc
+                regla_vc = rule.vc
                 # Posicion de la tripleta en conclusiones
-                indice_trip = regla_con.index(trip)
+                indice_trip = rule_con.index(trip)
                 # Grado de implicacion de la tripleta
                 vc_trip =  regla_vc[indice_trip]
                 # Si su grado de implicacion supera el umbral, la regla se considera util y se guarda
                 if abs(vc_trip) >= epsilon: 
-                    lista_reglas.append(regla)
+                    rule_list.append(rule)
         
         # Retorno lista de reglas 
-        return lista_reglas
+        return rule_list
