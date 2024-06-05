@@ -8,6 +8,25 @@ epsilon = 0.5   # Para determinar cuando una regla tiene un grado de certidumbre
 delta   = 0.2   # Para determinar si el grado de certidumbre es suficiente para gatillar una regla (es variable)
 
 #=============================================================================
+# Operadores para progagar valores de certidumbre
+
+def max_mod(list):
+    """
+    Funcion que retorna el numero cuyo valor absoluto es el maximo
+    """
+    if not list:
+        return None
+    return max(list, key=abs)
+
+def min_mod(list):
+    """
+    Funcion que retorna el numero cuyo valor absoluto es el minimo
+    """
+    if not list:
+        return None
+    return min(list, key=abs)
+
+#=============================================================================
 # Estructuras basicas
 
 class Fact:
