@@ -55,10 +55,10 @@ class Fact:
         
         # Se revisan reglas que podrian probar la hipotesis
         else:
-            ##### SIGUIENTE PASO: HACER FUNCION PARA EVALUAR REGLAS
+            ##### SIGUIENTE PASO: EVALUAR REGLAS HASTA SUPERAR UMBRAL O HASTA QUE SE ACABEN LAS REGLAS #####
+            #####                 SI LAS REGLAS NO FUNCIONARON, PREGUNTAR AL USUARIO                   #####
             return rule_list
     
-
 class Rule:
     def __init__(self, prem, con, vc):
         self.prem   = prem
@@ -119,8 +119,6 @@ class Rule:
         # Se retorna la informacion que se estaba buscando, que ya esta presente en la base de hechos
         return fb.get_vc(prem_obj)
             
-            
-
 #=============================================================================
 # Conjuntos a utilizar
 
@@ -173,7 +171,6 @@ class FactBase:
             # Guardar valores
             self.list_prem.append(prem)
             self.list_vc.append(vc)
-
 
     def get_vc(self, prem):
         """"
