@@ -4,47 +4,47 @@ from modelo import *
 # Hipotesis a considerar
 
 H1  = Fact(
-    ["animal es perro"],
+    "animal es perro",
     0.0)
 
 H2  = Fact(
-    ["animal es cheetah"],
+    "animal es cheetah",
     0.0)
 
 H3  = Fact(
-    ["animal es tigre"],
+    "animal es tigre",
     0.0)
 
 H4  = Fact(
-    ["animal es elefante"],
+    "animal es elefante",
     0.0)
 
 H5  = Fact(
-    ["animal es jirafa"],
+    "animal es jirafa",
     0.0)
 
 H6  = Fact(
-    ["animal es cebra"],
+    "animal es cebra",
     0.0)
 
 H7  = Fact(
-    ["animal es murciélago"],
+    "animal es murciélago",
     0.0)
 
 H8  = Fact(
-    ["animal es tortuga"],
+    "animal es tortuga",
     0.0)
 
 H9  = Fact(
-    ["animal es avestruz"],
+    "animal es avestruz",
     0.0)
 
 H10 = Fact(
-    ["animal es gaviota"],
+    "animal es gaviota",
     0.0)
 
 H11 = Fact(
-    ["animal es loro"],
+    "animal es loro",
     0.0)
 
 #=============================================================================
