@@ -54,10 +54,43 @@ class Fact:
             return vc 
         
         # Se revisan reglas que podrian probar la hipotesis
-        else:
-            ##### SIGUIENTE PASO: EVALUAR REGLAS HASTA SUPERAR UMBRAL O HASTA QUE SE ACABEN LAS REGLAS #####
-            #####                 SI LAS REGLAS NO FUNCIONARON, PREGUNTAR AL USUARIO                   #####
-            return rule_list
+        else: 
+            # Inicializacion de conocimiento acumulado
+            vc_acc = 0.0
+            # Indicador de exito de reglas
+            i = False
+
+            # Se recorren las reglas hasta superar el umbral o no queden reglas
+            for rule in rule_list:
+                # Salida de la regla
+                res = rule.evaluate(fb,rb,self.prem)
+                if res != None:
+                    # Se indica que al menos una regla se gatillo
+                    i = True
+                    # Se actualiza el vc acumulado
+                    vc_acc =  max_mod([vc_acc, res])
+                    # Se ve si se supero el umbral gamma
+                    if abs(vc_acc) >= gamma:
+                        # Se crea el hecho
+                        fact = Fact(self.prem, vc_acc)
+                        # Se agrega el hecho a la base de hechos
+                        fb.add_mod_fact(fact)
+                        # Se retorna al vc acumulado
+                        return vc_acc
+            
+            # No se supera el umbral con las reglas
+            if i: # 
+                # Se crea el hecho
+                fact = Fact(self.prem, vc_acc)
+                # Se agrega el hecho a la base de hechos
+                fb.add_mod_fact(fact)
+                # Se retorna al vc acumulado
+                return vc_acc
+            
+            # Ninguna regla se pudo gatillar y por ende se pregunta el usuario
+            else:
+                vc = fb.ask_user(self.prem)
+                return vc
     
 class Rule:
     def __init__(self, prem, con, vc):
