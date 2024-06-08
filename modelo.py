@@ -1,7 +1,7 @@
 #=============================================================================
 # Parametros de control
 
-alpha   = 0.7   # Para detener el AEI cuando se demuestre una hipotesis
+alpha   = 0.8   # Para detener el AEI cuando se demuestre una hipotesis
 beta    = 0.2   # Para determinar si un hecho tiene un grado de certidumbre suficiente
 gamma   = 0.85  # Para determinar si se debe seguir buscando un mejor grado de certidumbre para un hecho
 epsilon = 0.5   # Para determinar cuando una regla tiene un grado de certidumbre suficiente para inferir una hipotesis
@@ -34,7 +34,7 @@ class Fact:
         self.prem   = prem
         self.vc     = vc
     
-    def hypothesis(self, fb, rb):
+    def hypothesis(self, fb, rb, hs):
         """
         Metodo que obtiene el vc de una hipotesis
         """
@@ -63,7 +63,7 @@ class Fact:
             # Se recorren las reglas hasta superar el umbral o no queden reglas
             for rule in rule_list:
                 # Salida de la regla
-                res = rule.evaluate(fb,rb,self.prem)
+                res = rule.evaluate(fb,rb,self.prem, hs)
                 if res != None:
                     # Se indica que al menos una regla se gatillo
                     i = True
@@ -79,7 +79,7 @@ class Fact:
                         return vc_acc
             
             # No se supera el umbral con las reglas
-            if i: # 
+            if i: 
                 # Se crea el hecho
                 fact = Fact(self.prem, vc_acc)
                 # Se agrega el hecho a la base de hechos
@@ -89,8 +89,17 @@ class Fact:
             
             # Ninguna regla se pudo gatillar y por ende se pregunta el usuario
             else:
-                vc = fb.ask_user(self.prem)
-                return vc
+                # Si se encuentra en la base de hipotesis de alto nivel
+                if hs.is_in(self.prem):
+                    # Se dice que no se puede demostrar
+                    print(f"No se puede demostrar si su {self.prem}.")
+                    # Se retorna None
+                    return None
+
+                # Se pregunta al usuario
+                else:
+                    vc = fb.ask_user(self.prem)
+                    return vc
     
 class Rule:
     def __init__(self, prem, con, vc):
@@ -107,9 +116,9 @@ class Rule:
         # Retorno booleano si la regla se puede evaluar
         return set(self.prem).issubset(fb_list_prem)
     
-    def evaluate(self, fb, rb, prem_obj):
+    def evaluate(self, fb, rb, prem_obj, hs):
         """
-        Método para evaluar una regla concentrandose en la informacion que se quiere obtener
+        Metodo para evaluar una regla concentrandose en la informacion que se quiere obtener
         """
         # Parametros de la regla
         prem = self.prem 
@@ -130,7 +139,7 @@ class Rule:
             # Se ve como hipotesis para obtener su valor
             h_i = Fact(prem_i, 0)
             # Se obtiene su valor de forma recursiva
-            vc_i = h_i.hypothesis(fb, rb)
+            vc_i = h_i.hypothesis(fb, rb, hs)
             # Actualizacion del vc acumulado
             vc_acc = min_mod([vc_acc,vc_i])
             # Si no se supera el umbral, no vale la pena seguir con las demas premisas
@@ -199,7 +208,7 @@ class FactBase:
             if max_mod([vc, vc_f]) == vc_f:
                 self.list_vc[index_f] = vc_f
 
-        # Si no existe se añade
+        # Si no existe se annade
         else:
             # Guardar valores
             self.list_prem.append(prem)
@@ -264,3 +273,60 @@ class RuleBase:
         
         # Retorno lista de reglas 
         return rule_list
+    
+class HypothesisSet:
+    def __init__(self, list_hyp):
+        self.list_hyp = list_hyp
+        self.list_prem = [fact.prem for fact in list_hyp]
+        self.list_vc = [fact.vc for fact in list_hyp]
+    
+    def print_info(self):
+        """
+        Metodo para mostrar la informacion contenida en la base de hipotesis
+        """
+        i = 0
+        # Se revisan las premisas
+        for prem in self.list_prem:
+            # Se muestra su información
+            print(f"{prem}: {self.list_vc[i]}")
+            i += 1
+
+    def is_in(self, prem):
+        """
+        Metodo para saber si la hipotesis se encuentra en la base de hipotesis
+        """
+        # Retorno booleano si la hipotesis esta en la base de hipotesis
+        if prem in self.list_prem:
+            return True
+        else:
+            return False
+        
+    def aei(self, fb, rb):
+        """
+        Metodo que ejecuta el AEI para todas las hipotesis de alto nivel
+        """
+        # Indice de la hipotesis
+        idx_hyp = 0
+
+        # Se recorren todas las hipotesis
+        for hyp in self.list_hyp:
+            # Se obtiene su vc
+            vc_hyp = hyp.hypothesis(fb, rb, self)
+            if vc_hyp != None:
+                # Se actualiza el vc de la lista
+                self.list_vc[idx_hyp] = vc_hyp
+                # Se actualiza el vc de la hipotesis
+                hyp.vc = vc_hyp
+
+                # Se ve si supera el umbral alpha
+                if vc_hyp >= alpha:
+                    # Se dice que animal es y la certeza
+                    print(f"Su {hyp.prem} con certeza {round(vc_hyp, 2)}.")
+                    # Se termina el proceso
+                    return
+
+        # Ninguna hipotesis supero el umbral
+        print("Ninguna hipótesis se cumplió con suficiente certeza. Los resultados se muestran a continuación:")
+        self.print_info()
+        return
+                    

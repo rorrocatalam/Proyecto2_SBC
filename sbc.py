@@ -163,8 +163,15 @@ R22 = Rule(
 #=============================================================================
 # Creacion de conjuntos
 
+# Base de hechos
+FB = FactBase()
+
 # Base de Reglas
 RB = RuleBase([R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12,R13,R14,R15,R16,R17,R18,R19,R20,R21,R22])
 
 # Conjunto de Hipotesis
-# HS = aaa([H1,H2,H3,H4,H5,H6,H7,H8,H9,H10,H11])
+HS = HypothesisSet([H1,H2,H3,H4,H5,H6,H7,H8,H9,H10,H11])
+
+#=============================================================================
+# Ejecucion del programa
+HS.aei(FB, RB)
