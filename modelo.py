@@ -1,7 +1,7 @@
 #=============================================================================
 # Parametros de control
 
-alpha   = 0.8   # Para detener el AEI cuando se demuestre una hipotesis
+alpha   = 0.7   # Para detener el AEI cuando se demuestre una hipotesis
 beta    = 0.2   # Para determinar si un hecho tiene un grado de certidumbre suficiente
 gamma   = 0.85  # Para determinar si se debe seguir buscando un mejor grado de certidumbre para un hecho
 epsilon = 0.5   # Para determinar cuando una regla tiene un grado de certidumbre suficiente para inferir una hipotesis
@@ -288,7 +288,7 @@ class HypothesisSet:
         # Se revisan las premisas
         for prem in self.list_prem:
             # Se muestra su información
-            print(f"{prem}: {self.list_vc[i]}")
+            print(f"{prem}: {round(self.list_vc[i],2)}")
             i += 1
 
     def is_in(self, prem):
@@ -324,9 +324,11 @@ class HypothesisSet:
                     print(f"Su {hyp.prem} con certeza {round(vc_hyp, 2)}.")
                     # Se termina el proceso
                     return
+        
+        # Siguiente hipotesis    
+            idx_hyp += 1
 
         # Ninguna hipotesis supero el umbral
         print("Ninguna hipótesis se cumplió con suficiente certeza. Los resultados se muestran a continuación:")
         self.print_info()
         return
-                    
