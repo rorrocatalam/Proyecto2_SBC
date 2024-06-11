@@ -1,8 +1,12 @@
 #=============================================================================
-import matplotlib.pyplot as plt
-
 import tkinter as tk
-from tkinter import simpledialog, ttk
+from tkinter import ttk
+from PIL import Image, ImageTk
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+# Directorio con imagenes de animales
+animals_path = "C:/Users/rodri/Desktop/Proyecto2_SBCEI/Opcionales/Animales/"
 
 #=============================================================================
 # Parametros de control
@@ -171,9 +175,11 @@ class Rule:
 # Conjuntos
 
 class FactBase:
-    def __init__(self):
+    def __init__(self, hs, app):
         self.list_prem  = []
         self.list_vc    = []
+        self.hs         = hs
+        self.app        = app
 
     def print_info(self):
         """
@@ -233,22 +239,13 @@ class FactBase:
         """
         Metodo para agregar un hecho dada la entrada del usuario
         """
-        vc = -10.0 # valor fuera de rango entre [-1,1]
-        while vc < -1.0 or vc > 1.0:
-            usr_in = input("\n¿Su " + prem + "?\n")
-            try:
-                vc = float(usr_in)
-                if vc < -1.0 or vc > 1.0:
-                    print("Favor ingresar un número entero entre -1 y 1.")
-                else:
-                    # Se crea el hecho
-                    fact = Fact(prem, vc)
-                    # Se guarda en la base de hechos
-                    self.add_mod_fact(fact)
-                    # Se retorna el valor indicado
-                    return vc
-            except ValueError:
-                print("Favor ingresar un número entero entre -1 y 1.")
+        # Se obtiene la respuesta del usuario
+        q = f"¿Su {prem}?"
+        n = round(self.app.ask_user(q),4)
+
+        # Se actualiza el grafico
+        self.app.show_plot(self.hs.plot_hyp())
+        return n
 
 class RuleBase:
     def __init__(self, rules):
@@ -281,10 +278,11 @@ class RuleBase:
         return rule_list
     
 class HypothesisSet:
-    def __init__(self, list_hyp):
+    def __init__(self, list_hyp, app):
         self.list_hyp = list_hyp
         self.list_prem = [fact.prem for fact in list_hyp]
         self.list_vc = [fact.vc for fact in list_hyp]
+        self.app = app
 
     def print_info(self):
         """
@@ -326,11 +324,16 @@ class HypothesisSet:
 
                 # Se ve si supera el umbral alpha
                 if vc_hyp >= alpha:
-                    # Se dice que animal es y la certeza
-                    print(f"Su {hyp.prem} con certeza {round(vc_hyp, 2)}.")
+                    # Animal en cuestion
+                    animal = hyp.prem.split()[-1]
+                    # Se muestra el animal 
+                    self.app.show_img(animal, round(vc_hyp,2))
+                    # Se actualiza el grafico
+                    self.app.show_plot(self.plot_hyp())
                     # Se termina el proceso
                     return
-
+            # Se actualiza el grafico
+            self.app.show_plot(self.plot_hyp())
             # Siguiente hipotesis    
             idx_hyp += 1
 
@@ -364,45 +367,119 @@ class HypothesisSet:
         # Se retorna la figura
         return fig
 
-class App:
+class Interface:
     def __init__(self, root):
+        # Ventana principal
         self.root = root
-        self.root.title("Sistema de Inferencia")
+        self.root.title("Sistema basado en conocimiento con Encadenamiento Inverso")
 
-        # Configurar el layout principal
-        self.root.geometry("800x600")
+        # Dimensiones
+        self.width, self.height = 1920, 1080
+        self.root.geometry(f"{self.width}x{self.height}")
+        self.root.resizable(False, False)
 
-        # Crear los frames
-        self.left_frame = tk.Frame(root, bg="lightblue", width=400, height=600)
-        self.top_right_frame = tk.Frame(root, bg="lightgreen", width=400, height=300)
-        self.bottom_right_frame = tk.Frame(root, bg="lightyellow", width=400, height=300)
+        # Tamano de la fuente
+        fontsize = 24
+        # Configuracion de estilo
+        style = ttk.Style()
+        style.configure("TLabel", font=("Helvetica", fontsize))
+        style.configure("TButton", font=("Helvetica", fontsize))
+        style.configure("TScale", font=("Helvetica", fontsize))
+        
+        # Frame izquierdo para preguntas
+        self.left_frame = ttk.Frame(self.root, width=self.width//2, height=self.height, relief='solid', borderwidth=1)
+        self.left_frame.place(x=0, y=0, width=self.width//2, height=self.height)
+        # Sub-frame para centrar las preguntas
+        self.center_left_frame = ttk.Frame(self.left_frame)
+        self.center_left_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
-        self.left_frame.grid(row=0, column=0, rowspan=2, sticky="nsew")
-        self.top_right_frame.grid(row=0, column=1, sticky="nsew")
-        self.bottom_right_frame.grid(row=1, column=1, sticky="nsew")
+        # Frame superior derecho para el grafico con resultados
+        self.top_right_frame = ttk.Frame(self.root, width=self.width//2, height=self.height//2, relief='solid', borderwidth=1)
+        self.top_right_frame.place(x=self.width//2, y=0, width=self.width//2, height=self.height//2)
+        
+        # Frame inferior derecho para imagen del animal
+        self.bottom_right_frame = ttk.Frame(self.root, width=self.width//2, height=self.height//2, relief='solid', borderwidth=1)
+        self.bottom_right_frame.place(x=self.width//2, y=self.height//2, width=self.width//2, height=self.height//2)
+        
+        # Slider entre -1 y 1 para ingresar respuestas
+        self.slider_label = ttk.Label(self.center_left_frame, text="Pregunta:")
+        self.slider_label.pack(pady=(0, 60))
+        self.slider = ttk.Scale(self.center_left_frame, from_=-1, to=1, orient=tk.HORIZONTAL, length=350)
+        self.slider.pack(pady=10)
+        
+        # Etiquetas del slider y posicionamiento
+        self.slider_label1 = ttk.Label(self.center_left_frame, text="No", font=("Helvetica", 18))
+        self.slider_label1.place(relx=0.05, rely=0.6, anchor=tk.CENTER)
+        self.slider_label2 = ttk.Label(self.center_left_frame, text="No sé", font=("Helvetica", 18))
+        self.slider_label2.place(relx=0.5, rely=0.6, anchor=tk.CENTER)
+        self.slider_label3 = ttk.Label(self.center_left_frame, text="Sí", font=("Helvetica", 18))
+        self.slider_label3.place(relx=0.95, rely=0.6, anchor=tk.CENTER)
 
-        # Configurar grid para la ventana principal
-        self.root.grid_rowconfigure(0, weight=1)
-        self.root.grid_rowconfigure(1, weight=1)
-        self.root.grid_columnconfigure(0, weight=1)
-        self.root.grid_columnconfigure(1, weight=1)
+        # Boton para continuar
+        self.save_button = ttk.Button(self.center_left_frame, text="Continuar", command=self.save_ans)
+        self.save_button.pack(pady=(120, 10))
 
-        # Añadir widgets al left_frame
-        self.question_label = tk.Label(self.left_frame, text="Pregunta: ")
-        self.question_label.pack(pady=20)
+        # Variable para almacenar la respuesta y control del flujo
+        self.ans = tk.DoubleVar()
+        self.cont = tk.BooleanVar()
 
-        self.answer_slider = tk.Scale(self.left_frame, from_=-1, to=1, resolution=0.01, orient='horizontal')
-        self.answer_slider.pack(pady=10)
+        self.current_fig = None
 
-        self.submit_button = tk.Button(self.left_frame, text="Enviar", command=self.submit_answer)
-        self.submit_button.pack(pady=20)
+    def show_plot(self, fig):
+        """
+        Metodo para mostrar grafico con resultados en el frame superior derecho
+        """
+        # Limpiar el frame antes de mostrar el grafico
+        for widget in self.top_right_frame.winfo_children():
+            widget.destroy()
 
-        self.user_input = tk.DoubleVar()
+        # Cerrar la figura actual si existe
+        if self.current_fig is not None:
+            plt.close(self.current_fig)
+        
+        # Canvas para el grafico y se agrega al frame
+        canvas = FigureCanvasTkAgg(fig, master=self.top_right_frame)
+        canvas.draw()
+        canvas.get_tk_widget().pack(expand=True, fill='both')
 
-    def submit_answer(self):
-        self.user_input.set(self.answer_slider.get())
+        # Almacenar la referencia a la figura actual
+        self.current_fig = fig
 
-    def ask_user(self, question):
-        self.question_label.config(text=question)
-        self.submit_button.wait_variable(self.user_input)  # Esperar a que el usuario ingrese el valor
-        return self.user_input.get()
+    def show_img(self, animal, vc):
+        # Limpiar el frame antes de mostrar la imagen
+        for widget in self.bottom_right_frame.winfo_children():
+            widget.destroy()
+        
+        # Cerrar la figura actual si existe
+        if self.current_fig is not None:
+            plt.close(self.current_fig)
+            self.current_fig = None
+        
+        # Mensaje a mostrar
+        msg = f"Su animal es {animal} con certeza {vc}"
+        msg_label = ttk.Label(self.bottom_right_frame, text=msg, font=("Helvetica", 24))
+        msg_label.pack(pady=(10, 20))
+
+        # Mostrar la imagen en el frame
+        imagen = Image.open(f"{animals_path}{animal}.jpg")
+        # Redimensionamiento la imagen
+        frame_width = self.width // 2
+        frame_height = self.height // 2
+        max_width = int(frame_width * 0.9)
+        max_height = int(frame_height * 0.9)
+        imagen.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
+        imagen = ImageTk.PhotoImage(imagen)
+        label = tk.Label(self.bottom_right_frame, image=imagen)
+        label.image = imagen
+        label.pack()
+
+    def save_ans(self):
+        self.ans.set(self.slider.get())
+        self.cont.set(True)
+        print("Respuesta guardada:", self.ans.get())
+
+    def ask_user(self, prem):
+        self.slider_label.config(text=prem)
+        self.cont.set(False)
+        self.root.wait_variable(self.cont)
+        return self.ans.get()
