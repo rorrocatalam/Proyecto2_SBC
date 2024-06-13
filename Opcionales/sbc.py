@@ -181,5 +181,3 @@ if __name__ == "__main__":
 
     # Ejecucion del programa
     HS.aei(FB, RB)
-
-    root.mainloop()

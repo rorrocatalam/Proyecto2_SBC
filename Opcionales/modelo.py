@@ -59,10 +59,12 @@ class Fact:
         rule_list = rb.prem_in_con(self.prem)
         # Caso Base (lista vacía -> no hay reglas que tienen como conclusion la premisa)
         if not rule_list:
-            # Se pregunta al usuario
-            vc = fb.ask_user(self.prem)
-            return vc 
-        
+            # Se pregunta al usuario en caso de no haber preguntado antes
+            if not self.prem in fb.list_ques:
+                vc = fb.ask_user(self.prem)
+                return vc
+            else:
+                return 0
         # Se revisan reglas que podrian probar la hipotesis
         else: 
             # Inicializacion de conocimiento acumulado
@@ -106,10 +108,13 @@ class Fact:
                     # Se retorna None
                     return None
 
-                # Se pregunta al usuario
-                else:
+                # Se pregunta al usuario en caso de no haber preguntado antes
+                elif not self.prem in fb.list_ques:
                     vc = fb.ask_user(self.prem)
                     return vc
+                
+                else:
+                    return 0
     
 class Rule:
     def __init__(self, prem, con, vc):
@@ -184,6 +189,7 @@ class FactBase:
         self.list_vc    = []
         self.hs         = hs
         self.app        = app
+        self.list_ques  = []
 
     def print_info(self):
         """
@@ -243,6 +249,9 @@ class FactBase:
         """
         Metodo para agregar un hecho dada la entrada del usuario
         """
+        # Se annade a la lista de premisas preguntadas
+        self.list_ques.append(prem)
+
         # Se obtiene la respuesta del usuario
         q = f"¿Su {prem}?"
         n = round(self.app.ask_user(q),4)
@@ -336,6 +345,10 @@ class HypothesisSet:
                     self.app.show_img(animal, round(vc_hyp,2))
                     # Se actualiza el grafico
                     self.app.show_plot(self.plot_hyp())
+                    # Cambio de texto para el boton
+                    self.app.save_button.config(text="Finalizar")
+                    # Muestro fin del programa en la seccion de preguntas
+                    self.app.ask_user("Hipótesis demostrada con suficiente certeza")
                     # Se termina el proceso
                     return
             # Se actualiza el grafico
@@ -343,6 +356,10 @@ class HypothesisSet:
             # Siguiente hipotesis    
             idx_hyp += 1
 
+        # Cambio de texto para el boton
+        self.app.save_button.config(text="Finalizar")
+        # Muestro fin del programa en la seccion de preguntas
+        self.app.ask_user("Ninguna hipótesis se cumplió con suficiente certeza")
         # Ninguna hipotesis supero el umbral
         print("Ninguna hipótesis se cumplió con suficiente certeza. Los resultados se muestran a continuación:")
         self.print_info()
