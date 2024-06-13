@@ -116,6 +116,7 @@ class Rule:
         self.prem   = prem
         self.con    = con
         self.vc     = vc
+        self.i      = False     # Indicador si la regla se ha evaluado
     
     def is_evaluable(self, fb):
         """
@@ -130,6 +131,9 @@ class Rule:
         """
         Metodo para evaluar una regla concentrandose en la informacion que se quiere obtener
         """
+        # Como se intentara evaluar la regla, se cambia su indicador
+        self.i = True
+
         # Parametros de la regla
         prem = self.prem 
         con = self.con
@@ -253,26 +257,28 @@ class RuleBase:
 
     def prem_in_con(self, prem):
         """
-        Metodo para encontrar las reglas utiles que tienen como conclusion una determinada premleta
+        Metodo para encontrar las reglas utiles que tienen como conclusion una determinada premisa
         """
         # Lista de reglas que cumplen requisito
         rule_list = []
 
         # Se revisan todas las reglas presentes
         for rule in self.rules:
-            # Conclusiones de la regla
-            rule_con = rule.con
-            # Si la premisa esta en las conclusiones se procede
-            if prem in rule_con:
-                # Grados de implicacion de conclusiones de la regla
-                regla_vc = rule.vc
-                # Posicion de la premleta en conclusiones
-                index_prem = rule_con.index(prem)
-                # Grado de implicacion de la premisa
-                vc_prem =  regla_vc[index_prem]
-                # Si su grado de implicacion supera el umbral, la regla se considera util y se guarda
-                if abs(vc_prem) >= epsilon: 
-                    rule_list.append(rule)
+            #Si no se ha intentado evaluar la regla
+            if not rule.i:
+                # Conclusiones de la regla
+                rule_con = rule.con
+                # Si la premisa esta en las conclusiones se procede
+                if prem in rule_con:
+                    # Grados de implicacion de conclusiones de la regla
+                    regla_vc = rule.vc
+                    # Posicion de la premleta en conclusiones
+                    index_prem = rule_con.index(prem)
+                    # Grado de implicacion de la premisa
+                    vc_prem =  regla_vc[index_prem]
+                    # Si su grado de implicacion supera el umbral, la regla se considera util y se guarda
+                    if abs(vc_prem) >= epsilon: 
+                        rule_list.append(rule)
         
         # Retorno lista de reglas 
         return rule_list

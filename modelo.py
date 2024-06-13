@@ -107,15 +107,6 @@ class Rule:
         self.con    = con
         self.vc     = vc
     
-    def is_evaluable(self, fb):
-        """
-        Metodo para saber si la regla es evaluable en la base de hechos
-        """
-        # Premisas de la base de hechos
-        fb_list_prem = fb.list_prem
-        # Retorno booleano si la regla se puede evaluar
-        return set(self.prem).issubset(fb_list_prem)
-    
     def evaluate(self, fb, rb, prem_obj, hs):
         """
         Metodo para evaluar una regla concentrandose en la informacion que se quiere obtener
