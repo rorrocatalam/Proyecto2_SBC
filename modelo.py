@@ -325,7 +325,7 @@ class HypothesisSet:
                     # Se termina el proceso
                     return
         
-        # Siguiente hipotesis    
+            # Siguiente hipotesis    
             idx_hyp += 1
 
         # Ninguna hipotesis supero el umbral
