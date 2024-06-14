@@ -397,17 +397,19 @@ class Interface:
         self.root.title("Sistema basado en conocimiento con Encadenamiento Inverso")
 
         # Dimensiones
-        self.width, self.height = 1920, 1080
+        self.width, self.height = 1080, 720
         self.root.geometry(f"{self.width}x{self.height}")
         self.root.resizable(False, False)
 
         # Tamano de la fuente
-        fontsize = 24
+        fontsize1 = int(self.width/80)
+        fontsize2 = int(0.75*fontsize1)
+
         # Configuracion de estilo
         style = ttk.Style()
-        style.configure("TLabel", font=("Helvetica", fontsize))
-        style.configure("TButton", font=("Helvetica", fontsize))
-        style.configure("TScale", font=("Helvetica", fontsize))
+        style.configure("TLabel", font=("Helvetica", fontsize1))
+        style.configure("TButton", font=("Helvetica", fontsize1))
+        style.configure("TScale", font=("Helvetica", fontsize1))
         
         # Frame izquierdo para preguntas
         self.left_frame = ttk.Frame(self.root, width=self.width//2, height=self.height, relief='solid', borderwidth=1)
@@ -431,11 +433,11 @@ class Interface:
         self.slider.pack(pady=10)
         
         # Etiquetas del slider y posicionamiento
-        self.slider_label1 = ttk.Label(self.center_left_frame, text="No", font=("Helvetica", 18))
+        self.slider_label1 = ttk.Label(self.center_left_frame, text="No", font=("Helvetica", fontsize2))
         self.slider_label1.place(relx=0.05, rely=0.6, anchor=tk.CENTER)
-        self.slider_label2 = ttk.Label(self.center_left_frame, text="No sé", font=("Helvetica", 18))
+        self.slider_label2 = ttk.Label(self.center_left_frame, text="No sé", font=("Helvetica", fontsize2))
         self.slider_label2.place(relx=0.5, rely=0.6, anchor=tk.CENTER)
-        self.slider_label3 = ttk.Label(self.center_left_frame, text="Sí", font=("Helvetica", 18))
+        self.slider_label3 = ttk.Label(self.center_left_frame, text="Sí", font=("Helvetica", fontsize2))
         self.slider_label3.place(relx=0.95, rely=0.6, anchor=tk.CENTER)
 
         # Boton para continuar

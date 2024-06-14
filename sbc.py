@@ -178,3 +178,6 @@ HS.aei(FB, RB)
 
 # Muestra de conclusiones al usuario
 HS.print_info()
+
+print("\n")
+FB.print_info()
