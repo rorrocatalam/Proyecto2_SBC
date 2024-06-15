@@ -74,6 +74,7 @@ class Fact:
 
             # Se recorren las reglas hasta superar el umbral o no queden reglas
             for rule in rule_list:
+                
                 # Salida de la regla
                 res = rule.evaluate(fb,rb,self.prem, hs)
                 if res != None:
@@ -123,14 +124,22 @@ class Rule:
         self.vc     = vc
         self.i      = False     # Indicador si la regla se ha evaluado
     
-    def is_evaluable(self, fb):
+    def rule_preq(self, fb, delta_r):
         """
-        Metodo para saber si la regla es evaluable en la base de hechos
+        Precalificador de reglas. Retorna True si sus premisas son desconocidas o superan el umbral
         """
         # Premisas de la base de hechos
         fb_list_prem = fb.list_prem
-        # Retorno booleano si la regla se puede evaluar
-        return set(self.prem).issubset(fb_list_prem)
+        # Se revisan las premisas
+        for prem in fb_list_prem:
+            # Si la premisa esta, se revisa su vc
+            if fb.is_in(prem):
+                vc_r = fb.get_vc(prem)
+                # La premisa es falsa si no supera el umbral
+                if abs(vc_r) < delta_r:
+                    return False
+        # Es factible evaluar la regla
+        return True
     
     def evaluate(self, fb, rb, prem_obj, hs):
         """
@@ -150,35 +159,40 @@ class Rule:
         # Umbral para seguir y gatillar regla
         delta_r = delta/vc_r
 
-        # vc acumulado de la regla
-        vc_acc = -10.0 # valor fuera de rango entre [-1,1]
+        # Se procede solo en caso de que sea factible evaluar la regla
+        if self.rule_preq(fb, delta_r):
+            # vc acumulado de la regla
+            vc_acc = -10.0 # valor fuera de rango entre [-1,1]
 
-        # Se ve cada premisa de la regla
-        for prem_i in prem:
-            # Se ve como hipotesis para obtener su valor
-            h_i = Fact(prem_i, 0)
-            # Se obtiene su valor de forma recursiva
-            vc_i = h_i.hypothesis(fb, rb, hs)
-            # Actualizacion del vc acumulado
-            vc_acc = min_mod([vc_acc,vc_i])
-            # Si no se supera el umbral, no vale la pena seguir con las demas premisas
-            if abs(vc_acc) < delta_r:
-                return None
-        
-        # Se gatilla la regla y se guardan resultados en la base de hechos
-        i = 0
-        while i < len(con):
-            # Resultado conclusion
-            res = vc_acc * vc[i]
-            # Se crea el hecho
-            fact_i = Fact(con[i], res)
-            # Se guarda
-            fb.add_mod_fact(fact_i)
-            # Proxima conclusion
-            i+=1
-        
-        # Se retorna la informacion que se estaba buscando, que ya esta presente en la base de hechos
-        return fb.get_vc(prem_obj)
+            # Se ve cada premisa de la regla
+            for prem_i in prem:
+                # Se ve como hipotesis para obtener su valor
+                h_i = Fact(prem_i, 0)
+                # Se obtiene su valor de forma recursiva
+                vc_i = h_i.hypothesis(fb, rb, hs)
+                # Actualizacion del vc acumulado
+                vc_acc = min_mod([vc_acc,vc_i])
+                # Si no se supera el umbral, no vale la pena seguir con las demas premisas
+                if abs(vc_acc) < delta_r:
+                    return None
+            
+            # Se gatilla la regla y se guardan resultados en la base de hechos
+            i = 0
+            while i < len(con):
+                # Resultado conclusion
+                res = vc_acc * vc[i]
+                # Se crea el hecho
+                fact_i = Fact(con[i], res)
+                # Se guarda
+                fb.add_mod_fact(fact_i)
+                # Proxima conclusion
+                i+=1
+            
+            # Se retorna la informacion que se estaba buscando, que ya esta presente en la base de hechos
+            return fb.get_vc(prem_obj)
+        # Ni siquiera fue factible evaluar la regla
+        else:
+            return None
             
 #=============================================================================
 # Conjuntos
