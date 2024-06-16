@@ -191,13 +191,14 @@ class FactBase:
         
         # Se ya existe el hecho
         if self.is_in(prem):
+            print(f"{prem} ya existe")
             # Se busca su posicion
             index_f = self.list_prem.index(prem)
             # vc del hecho
             vc_f = self.list_vc[index_f]
             # Se actualiza si hay mayor certeza
-            if max_mod([vc, vc_f]) == vc_f:
-                self.list_vc[index_f] = vc_f
+            if max_mod([vc, vc_f]) == vc:
+                self.list_vc[index_f] = vc
 
         # Si no existe se annade
         else:
