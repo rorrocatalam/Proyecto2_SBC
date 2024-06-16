@@ -20,21 +20,23 @@ delta   = 0.2   # Para determinar si el grado de certidumbre es suficiente para 
 #=============================================================================
 # Operadores para propagar valores de certidumbre
 
-def max_mod(list):
+def max_mod(lst):
     """
-    Funcion que retorna el numero cuyo valor absoluto es el maximo
+    Funcion que retorna el numero cuyo valor absoluto es el maximo,
+    prefiriendo valores negativos en caso de empate.
     """
-    if not list:
+    if not lst:
         return None
-    return max(list, key=abs)
+    return max(lst, key=lambda x: (abs(x), x if x < 0 else -float('inf')))
 
-def min_mod(list):
+def min_mod(lst):
     """
-    Funcion que retorna el numero cuyo valor absoluto es el minimo
+    Funcion que retorna el número cuyo valor absoluto es el minimo,
+    prefiriendo valores negativos en caso de empate.
     """
-    if not list:
+    if not lst:
         return None
-    return min(list, key=abs)
+    return min(lst, key=lambda x: (abs(x), x if x < 0 else float('inf')))
 
 #=============================================================================
 # Estructuras basicas
@@ -56,11 +58,11 @@ class Fact:
                 return vc
         
         # El hecho no esta en la base de hechos o no hay conocimiento suficiente (no supera el umbral beta)
-        rule_list = rb.prem_in_con(self.prem)
-        # Caso Base (lista vacía -> no hay reglas que tienen como conclusion la premisa)
-        if not rule_list:
+        rule_lst = rb.prem_in_con(self.prem)
+        # Caso Base (lsta vacía -> no hay reglas que tienen como conclusion la premisa)
+        if not rule_lst:
             # Se pregunta al usuario en caso de no haber preguntado antes
-            if not self.prem in fb.list_ques:
+            if not self.prem in fb.lst_ques:
                 vc = fb.ask_user(self.prem)
                 return vc
             else:
@@ -73,7 +75,7 @@ class Fact:
             i = False
 
             # Se recorren las reglas hasta superar el umbral o no queden reglas
-            for rule in rule_list:
+            for rule in rule_lst:
                 
                 # Salida de la regla
                 res = rule.evaluate(fb,rb,self.prem, hs)
@@ -110,7 +112,7 @@ class Fact:
                     return None
 
                 # Se pregunta al usuario en caso de no haber preguntado antes
-                elif not self.prem in fb.list_ques:
+                elif not self.prem in fb.lst_ques:
                     vc = fb.ask_user(self.prem)
                     return vc
                 
@@ -129,9 +131,9 @@ class Rule:
         Precalificador de reglas. Retorna True si sus premisas son desconocidas o superan el umbral
         """
         # Premisas de la base de hechos
-        fb_list_prem = fb.list_prem
+        fb_lst_prem = fb.lst_prem
         # Se revisan las premisas
-        for prem in fb_list_prem:
+        for prem in fb_lst_prem:
             # Si la premisa esta, se revisa su vc
             if fb.is_in(prem):
                 vc_r = fb.get_vc(prem)
@@ -199,11 +201,11 @@ class Rule:
 
 class FactBase:
     def __init__(self, hs, app):
-        self.list_prem  = []
-        self.list_vc    = []
+        self.lst_prem  = []
+        self.lst_vc    = []
         self.hs         = hs
         self.app        = app
-        self.list_ques  = []
+        self.lst_ques  = []
 
     def print_info(self):
         """
@@ -211,9 +213,9 @@ class FactBase:
         """
         i = 0
         # Se revisan las premisas
-        for prem in self.list_prem:
+        for prem in self.lst_prem:
             # Se muestra su información
-            print(f"{prem}: {self.list_vc[i]}")
+            print(f"{prem}: {self.lst_vc[i]}")
             i += 1
             
     def is_in(self, prem):
@@ -221,7 +223,7 @@ class FactBase:
         Metodo para saber si el hecho esta en la base de hechos, dada su premisa
         """
         # Retorno booleano si la regla se puede evaluar
-        if prem in self.list_prem:
+        if prem in self.lst_prem:
             return True
         else:
             return False
@@ -237,34 +239,34 @@ class FactBase:
         # Se ya existe el hecho
         if self.is_in(prem):
             # Se busca su posicion
-            index_f = self.list_prem.index(prem)
+            index_f = self.lst_prem.index(prem)
             # vc del hecho
-            vc_f = self.list_vc[index_f]
+            vc_f = self.lst_vc[index_f]
             # Se actualiza si hay mayor certeza
             if max_mod([vc, vc_f]) == vc:
-                self.list_vc[index_f] = vc
+                self.lst_vc[index_f] = vc
 
         # Si no existe se annade
         else:
             # Guardar valores
-            self.list_prem.append(prem)
-            self.list_vc.append(vc)
+            self.lst_prem.append(prem)
+            self.lst_vc.append(vc)
 
     def get_vc(self, prem):
         """"
         Metodo para obtener el vc de una premisa presente en la base de hechos
         """
         # Posicion del hecho en la base de hechos
-        index_f = self.list_prem.index(prem)
+        index_f = self.lst_prem.index(prem)
         # Se retorna el vc del hecho
-        return self.list_vc[index_f]
+        return self.lst_vc[index_f]
 
     def ask_user(self, prem):
         """
         Metodo para agregar un hecho dada la entrada del usuario
         """
-        # Se annade a la lista de premisas preguntadas
-        self.list_ques.append(prem)
+        # Se annade a la lsta de premisas preguntadas
+        self.lst_ques.append(prem)
 
         # Se obtiene la respuesta del usuario
         q = f"¿Su {prem}?"
@@ -282,8 +284,8 @@ class RuleBase:
         """
         Metodo para encontrar las reglas utiles que tienen como conclusion una determinada premisa
         """
-        # Lista de reglas que cumplen requisito
-        rule_list = []
+        # lsta de reglas que cumplen requisito
+        rule_lst = []
 
         # Se revisan todas las reglas presentes
         for rule in self.rules:
@@ -301,16 +303,16 @@ class RuleBase:
                     vc_prem =  regla_vc[index_prem]
                     # Si su grado de implicacion supera el umbral, la regla se considera util y se guarda
                     if abs(vc_prem) >= epsilon: 
-                        rule_list.append(rule)
+                        rule_lst.append(rule)
         
-        # Retorno lista de reglas 
-        return rule_list
+        # Retorno lsta de reglas 
+        return rule_lst
     
 class HypothesisSet:
-    def __init__(self, list_hyp, app):
-        self.list_hyp = list_hyp
-        self.list_prem = [fact.prem for fact in list_hyp]
-        self.list_vc = [fact.vc for fact in list_hyp]
+    def __init__(self, lst_hyp, app):
+        self.lst_hyp = lst_hyp
+        self.lst_prem = [fact.prem for fact in lst_hyp]
+        self.lst_vc = [fact.vc for fact in lst_hyp]
         self.app = app
 
     def print_info(self):
@@ -319,9 +321,9 @@ class HypothesisSet:
         """
         i = 0
         # Se revisan las premisas
-        for prem in self.list_prem:
+        for prem in self.lst_prem:
             # Se muestra su información
-            print(f"{prem}: {self.list_vc[i]}")
+            print(f"{prem}: {self.lst_vc[i]}")
             i += 1
 
     def is_in(self, prem):
@@ -329,7 +331,7 @@ class HypothesisSet:
         Metodo para saber si la hipotesis se encuentra en la base de hipotesis
         """
         # Retorno booleano si la hipotesis esta en la base de hipotesis
-        if prem in self.list_prem:
+        if prem in self.lst_prem:
             return True
         else:
             return False
@@ -342,12 +344,12 @@ class HypothesisSet:
         idx_hyp = 0
 
         # Se recorren todas las hipotesis
-        for hyp in self.list_hyp:
+        for hyp in self.lst_hyp:
             # Se obtiene su vc
             vc_hyp = hyp.hypothesis(fb, rb, self)
             if vc_hyp != None:
-                # Se actualiza el vc de la lista
-                self.list_vc[idx_hyp] = vc_hyp
+                # Se actualiza el vc de la lsta
+                self.lst_vc[idx_hyp] = vc_hyp
                 # Se actualiza el vc de la hipotesis
                 hyp.vc = vc_hyp
 
@@ -384,11 +386,11 @@ class HypothesisSet:
         Metodo que crea un grafico que muestra los vc de las hipotesis de alto nivel
         """
         # Nombre de los animales
-        names = [hyp.split()[-1] for hyp in self.list_prem]
+        names = [hyp.split()[-1] for hyp in self.lst_prem]
         # Creacion de la figura
         fig, ax = plt.subplots(figsize=(10, 5))
         # Grafico de barras con cada vc
-        ax.bar(names, self.list_vc, color='orange', width=0.4)
+        ax.bar(names, self.lst_vc, color='orange', width=0.4)
         # Linea en y =0
         ax.axhline(0, color='black', linestyle='--')
         # Limites en y
