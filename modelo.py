@@ -44,7 +44,7 @@ class Fact:
             # El hecho sera relevante solo si existe suficiente certeza
             if abs(vc) >= beta:
                 return vc
-        
+
         # El hecho no esta en la base de hechos o no hay conocimiento suficiente (no supera el umbral beta)
         rule_list = rb.prem_in_con(self.prem)
         # Caso Base (lista vacía -> no hay reglas que tienen como conclusion la premisa)
@@ -54,7 +54,7 @@ class Fact:
             return vc 
         
         # Se revisan reglas que podrian probar la hipotesis
-        else: 
+        else:
             # Inicializacion de conocimiento acumulado
             vc_acc = 0.0
             # Indicador de exito de reglas
@@ -134,7 +134,7 @@ class Rule:
             # Actualizacion del vc acumulado
             vc_acc = min_mod([vc_acc,vc_i])
             # Si no se supera el umbral, no vale la pena seguir con las demas premisas
-            if abs(vc_acc) < delta_r:
+            if abs(vc_acc) < abs(delta_r):
                 return None
         
         # Se gatilla la regla y se guardan resultados en la base de hechos

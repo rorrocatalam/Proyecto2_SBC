@@ -136,7 +136,7 @@ class Rule:
             if fb.is_in(prem):
                 vc_r = fb.get_vc(prem)
                 # La premisa es falsa si no supera el umbral
-                if abs(vc_r) < delta_r:
+                if abs(vc_r) < abs(delta_r):
                     return False
         # Es factible evaluar la regla
         return True
@@ -173,7 +173,7 @@ class Rule:
                 # Actualizacion del vc acumulado
                 vc_acc = min_mod([vc_acc,vc_i])
                 # Si no se supera el umbral, no vale la pena seguir con las demas premisas
-                if abs(vc_acc) < delta_r:
+                if abs(vc_acc) < abs(delta_r):
                     return None
             
             # Se gatilla la regla y se guardan resultados en la base de hechos
