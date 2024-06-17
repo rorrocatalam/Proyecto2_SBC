@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # Directorio con imagenes de animales
-animals_path = "C:/Users/rodri/Desktop/Proyecto2_SBCEI/Opcionales/Animales/"
+animals_path = "C:/.../Proyecto2_SBCEI/Opcionales/Animales/"
 
 #=============================================================================
 # Parametros de control
@@ -106,8 +106,6 @@ class Fact:
             else:
                 # Si se encuentra en la base de hipotesis de alto nivel
                 if hs.is_in(self.prem):
-                    # Se dice que no se puede demostrar
-                    print(f"No se puede demostrar si su {self.prem}.")
                     # Se retorna None
                     return None
 
@@ -376,9 +374,6 @@ class HypothesisSet:
         self.app.save_button.config(text="Finalizar")
         # Muestro fin del programa en la seccion de preguntas
         self.app.ask_user("Ninguna hipótesis se cumplió con suficiente certeza")
-        # Ninguna hipotesis supero el umbral
-        print("Ninguna hipótesis se cumplió con suficiente certeza. Los resultados se muestran a continuación:")
-        self.print_info()
         return
     
     def plot_hyp(self):
@@ -487,6 +482,9 @@ class Interface:
         self.current_fig = fig
 
     def show_img(self, animal, vc):
+        """
+        Metodo para mostrar imagen con animal en frame inferior derecho
+        """
         # Limpiar el frame antes de mostrar la imagen
         for widget in self.bottom_right_frame.winfo_children():
             widget.destroy()
@@ -515,11 +513,16 @@ class Interface:
         label.pack()
 
     def save_ans(self):
+        """
+        Metodo para obtener el valor apuntado en el slider
+        """
         self.ans.set(self.slider.get())
         self.cont.set(True)
-        print("Respuesta guardada:", self.ans.get())
 
     def ask_user(self, prem):
+        """
+        Metodo para mostrar la pregunta sobre la que se quiera obtener la informacion
+        """
         self.slider_label.config(text=prem)
         self.cont.set(False)
         self.root.wait_variable(self.cont)
