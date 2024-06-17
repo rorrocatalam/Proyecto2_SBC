@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # Directorio con imagenes de animales
-animals_path = "C:/.../Proyecto2_SBCEI/Opcionales/Animales/"
+animals_path = "C:/Users/rodri/Desktop/Proyecto2_SBCEI/Opcionales/Animales"
 
 #=============================================================================
 # Parametros de control
@@ -76,9 +76,10 @@ class Fact:
 
             # Se recorren las reglas hasta superar el umbral o no queden reglas
             for rule in rule_lst:
-                
+                print("Evaluando regla...")
                 # Salida de la regla
                 res = rule.evaluate(fb,rb,self.prem, hs)
+                print(res)
                 if res != None:
                     # Se indica que al menos una regla se gatillo
                     i = True
@@ -128,10 +129,8 @@ class Rule:
         """
         Precalificador de reglas. Retorna True si sus premisas son desconocidas o superan el umbral
         """
-        # Premisas de la base de hechos
-        fb_lst_prem = fb.lst_prem
         # Se revisan las premisas
-        for prem in fb_lst_prem:
+        for prem in self.prem:
             # Si la premisa esta, se revisa su vc
             if fb.is_in(prem):
                 vc_r = fb.get_vc(prem)
@@ -146,7 +145,7 @@ class Rule:
         Metodo para evaluar una regla concentrandose en la informacion que se quiere obtener
         """
         # Como se intentara evaluar la regla, se cambia su indicador
-        self.i = True
+        self.i = False
 
         # Parametros de la regla
         prem = self.prem 
@@ -172,6 +171,7 @@ class Rule:
                 vc_i = h_i.hypothesis(fb, rb, hs)
                 # Actualizacion del vc acumulado
                 vc_acc = min_mod([vc_acc,vc_i])
+                print(f"delta_r: {delta_r}, vc_acc: {vc_acc}")
                 # Si no se supera el umbral, no vale la pena seguir con las demas premisas
                 if abs(vc_acc) < abs(delta_r):
                     return None
@@ -268,11 +268,16 @@ class FactBase:
 
         # Se obtiene la respuesta del usuario
         q = f"¿Su {prem}?"
-        n = round(self.app.ask_user(q),4)
+        vc = round(self.app.ask_user(q),4)
+
+        # Se crea el hecho
+        fact = Fact(prem, vc)
+        # Se guarda en la base de hechos
+        self.add_mod_fact(fact)
 
         # Se actualiza el grafico
         self.app.show_plot(self.hs.plot_hyp())
-        return n
+        return vc
 
 class RuleBase:
     def __init__(self, rules):

@@ -181,3 +181,8 @@ if __name__ == "__main__":
 
     # Ejecucion del programa
     HS.aei(FB, RB)
+
+    print("\nBase de hechos")
+    print(FB.print_info())
+    print("\nHS")   
+    print(HS.print_info())
